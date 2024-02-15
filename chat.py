@@ -15,6 +15,13 @@ from rich.console import Console
 from griptape.structures import Agent
 from griptape.rules import Rule, Ruleset
 
+# LLMs
+from griptape.drivers import OpenAiChatPromptDriver
+
+# from griptape.tokenizers import HuggingFaceTokenizer
+# from transformers import AutoTokenizer
+
+
 # get current date/time
 # format like Wed Dec 23, 1:33am
 current_date_time = time.strftime("%a %b %d, %I:%M%p")
@@ -34,15 +41,6 @@ json_ruleset = Ruleset(
         ),
         Rule(
             "If it sounds like the person is done chatting, set 'continue_chatting' to False, otherwise it is True"
-        ),
-    ],
-)
-
-system_ruleset = Ruleset(
-    name="sys_ruleset",
-    rules=[
-        Rule(
-            "You are a helpful AI assistant named Em. You are here to help Jacob with any questions he may have. !Important- Please don't use disclaimers like: 'As an AI...' Just anwser the questions in a direct and friendly manner. If you don't know that anwser, just say something like: 'I would need to do more research on that subject to give you an accurate anwser.'"
         ),
     ],
 )
@@ -83,9 +81,23 @@ class Em(Agent):
 
 
 agent = Em(
-    rulesets=[system_ruleset, json_ruleset],
-    logger_level=logging.ERROR,
+    prompt_driver=OpenAiChatPromptDriver(
+        api_key="sk-ollama",
+        base_url="http://localhost:11434/v1/",
+        model="mistral",
+        max_tokens=300,
+    )
 )
+
+
+# agent = Em(
+#     prompt_driver=OpenAiChatPromptDriver(
+#         base_url="http://localhost:11434/v1/", api_key="sk-ollama", model="mistral"
+#     ),
+#     input_template="You are a helpful AI assistant named Em. You are here to help Jacob with any questions he may have. !Important- Please don't use disclaimers like: 'As an AI...' Just anwser the questions in a direct and friendly manner. If you don't know that anwser, just say something like: 'I would need to do more research on that subject...'",
+#     rulesets=[json_ruleset],
+#     logger_level=logging.ERROR,
+# )
 
 
 # Keep track of when we're chatting
